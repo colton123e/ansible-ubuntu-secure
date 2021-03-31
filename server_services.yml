@@ -1,0 +1,11 @@
+---
+- name: Check if {{ serverservicename }} service exists
+  stat: 'path=/etc/init.d/{{ serverservicename }}'
+  register: serverservicestatus
+
+- name: Disable '{{ serverservicename }}'
+  service:
+    name: '{{ serverservicename }}'
+    enabled: no
+    state: stopped
+  when: serverservicestatus.stat.exists

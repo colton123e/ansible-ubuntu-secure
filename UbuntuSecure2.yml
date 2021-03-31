@@ -1,0 +1,175 @@
+---
+- hosts: [groupA]
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+
+# Restrict core dumps
+    - name: Configure /etc/security/limits.conf for core dumps
+      lineinfile:
+        path: /etc/security/limits.conf
+        line: '* hard core 0'
+
+    - name: Configure /etc/sysctl.conf
+      lineinfile:
+        path: /etc/sysctl.conf
+        line: 'fs.suid_dumpable = 0'
+
+    - name: Reload sysctl config
+      command: sysctl -p
+
+    - name: Configure so core dumps can't be made by setuid progs
+      lineinfile:
+        path: /etc/profile
+        line: 'ulimit -S -c 0 > /dev/null 2>&1'
+
+# Enable randomized vmem region placement
+    - name: Enable randomized virtual memory region placement
+      lineinfile:
+        path: /etc/sysctl.conf
+        line: 'kernel.randomize_va_space = 2'
+
+# OS HARDENING
+# Remove legacy services
+#	telnet-server; ypserv, ypbind; tftp, tftp-server
+    - include_tasks: server_legacy.yml
+      with_items:
+        - telnet-server
+        - ypserv
+        - ypbind
+        - tftp
+        - tftp-server
+      loop_control:
+        loop_var: serverlegacyname
+
+# Disable/Remove xinetd services
+    - name: Check if xinetd service exists
+      stat: 'path=/etc/init.d/xinetd'
+      register: servicestatus
+
+    - name: Stop xinetd if present
+      service:
+        name: xinetd
+        enabled: no
+        state: stopped
+      when: servicestatus.stat.exists
+
+    - name: Remove xinetd #Ubuntu
+      apt:
+        name: xinetd
+        state: absent
+        purge: yes
+
+    - name: Check if openbsd-inetd service exists #Ubuntu
+      stat: 'path=/etc/init.d/openbsd-inetd'
+      register: servicestatus
+
+    - name: Stop openbsd-inetd if present #Ubuntu
+      service:
+        name: openbsd-inetd
+        enabled: no
+        state: stopped
+      when: servicestatus.stat.exists
+
+    - name: Remove openbsd-inetd #Ubuntu
+      apt:
+        name: openbsd-inetd
+        state: absent
+        purge: yes
+
+# Disable legacy services
+    - include_tasks: server_services.yml
+      with_items:
+        - chargen-dgram
+        - chargen-stream
+        - daytime-dgram
+        - daytime-stream
+        - echo-dgram
+        - echo-stream
+        - tcpmux-server
+      loop_control:
+        loop_var: serverservicename
+
+# Disable untilized services
+# Disable FTP, DNS, SMB, DHCP, NFS, SNMP
+    - include_tasks: server_services.yml
+      with_items:
+        - FTP
+        - DNS
+        - SMB
+        - DHCP
+        - NFS
+        - SNMP
+      loop_control:
+        loop_var: serverservicename
+
+# Step 24 of UT Checklist
+    - name: Change daemon umask value #Ubuntu
+      lineinfile:
+        path: /etc/login.defs
+        regexp: '^UMASK'
+        line: 'UMASK 027'
+
+    - name: Add authentication to single user mode
+      lineinfile:
+        path: /etc/sysconfig/init
+        create: yes
+        line: "SINGLE=/sbin/sulogin"
+
+# Cron stuff
+    - name: Ensure cron is enabled #Ubuntu
+      systemd:
+        name: cron
+        enabled: yes
+        state: started
+
+    - name: Set perms for crontab
+      file:
+        path: /etc/crontab
+        owner: root
+        group: root
+        mode: og-rwx
+
+    - name: Set perms for cron.hourly
+      file:
+        path: /etc/cron.hourly
+        owner: root
+        group: root
+        mode: og-rwx
+
+    - name: Set perms for cron.daily
+      file:
+        path: /etc/cron.daily
+        owner: root
+        group: root
+        mode: og-rwx
+
+    - name: Set perms for cron.weekly
+      file:
+        path: /etc/cron.weekly
+        owner: root
+        group: root
+        mode: og-rwx
+
+    - name: Set perms for cron.monthly
+      file:
+        path: /etc/cron.monthly
+        owner: root
+        group: root
+        mode: og-rwx
+
+    - name: Set perms for cron.d
+      file:
+        path: /etc/cron.d
+        owner: root
+        group: root
+        mode: og-rwx
+
+#Message to state these set of tasks are complete
+    - name: display complete message
+      debug:
+        msg: 2-- Done with Process and OS Hardening
+
+- name: Start Network Security and Firewall Config
+  import_playbook: UbuntuSecure3.yml

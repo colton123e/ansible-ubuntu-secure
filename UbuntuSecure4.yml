@@ -1,0 +1,216 @@
+---
+- hosts: [groupA]
+  vars:
+    needIVM: true
+  become: yes
+  become_user: root
+  become_method: sudo
+  tasks:
+
+# SYSTEM INTEGRITY AND INTRUSION DETECTION
+# Set the TZ
+    - name: Set Timezone
+      community.general.timezone:
+        name: America/Chicago
+
+# Step 41 of UT Checklist
+    - name: Install auditd (if it isn't already) #Ubuntu
+      apt:
+        name: 'auditd'
+        state: latest
+
+    - name: Install audispd-plugins (if it isn't already) #Ubuntu
+      apt:
+        name: 'audispd-plugins'
+        state: latest
+
+    - name: Enable auditd
+      systemd:
+        name: auditd
+        enabled: yes
+        state: started
+
+    - name: Ensure auditing for processes that start prior to auditd is enabled #Ubuntu
+      lineinfile:
+        path: /etc/default/grub
+        line: GRUB_CMDLINE_LINUX="audit=1"
+
+    - name: Set audit_backlog_limit #Ubuntu
+      lineinfile:
+        path: /etc/default/grub
+        line: GRUB_CMDLINE_LINUX="audit_backlog_limit=8192"
+
+    - name: Update the grub config #Ubuntu
+      command: update-grub
+
+# PAM CONFIGURATION
+# Step 46 of UT Checklist
+    - name: Add auth warn to pam.d config
+      lineinfile:
+        path: /etc/pam.d/other
+        line: 'auth required  pam_warn.so'
+
+    - name: Add account warn to pam.d config
+      lineinfile:
+        path: /etc/pam.d/other
+        line: 'account required  pam_warn.so'
+
+    - name: Add password warn to pam.d config
+      lineinfile:
+        path: /etc/pam.d/other
+        line: 'password required  pam_warn.so'
+
+    - name: Add session warn to pam.d config
+      lineinfile:
+        path: /etc/pam.d/other
+        line: 'session required  pam_warn.so'
+
+    - name: Set password reuse policy #Ubuntu
+      lineinfile:
+        path: /etc/pam.d/common-password
+        line: 'password required pam_pwhistory.so remember=5'
+
+
+    - name: Set password requirements
+      blockinfile:
+        path: /etc/security/pwquality.conf
+        block: |
+          minlen = 8
+          minclass = 3
+          lcredit = -1
+          ucredit = -1
+          dcredit = -1
+        create: yes
+
+    - name: Set Common-Password to load the pwquality file #Ubuntu
+      lineinfile:
+        path: /etc/pam.d/common-password
+        line: 'password requisite pam_pwquality.so retry=3'
+
+    - name: Set password expiration
+      blockinfile:
+        path: /etc/login.defs
+        block: |
+           PASS_MAX_DAYS 365
+           PASS_MIN_DAYS 7
+           PASS_WARN_AGE 30
+
+## INSIGHT VM INSTALL
+    - name: Install unarchiver #Ubuntu
+      apt:
+        name:
+          - tar
+          - unzip
+        state: latest
+      when: needIVM == True
+
+    - name: Copy installer zip file to remote machine
+      unarchive:
+        src: agents-linux-1-4-2021.zip
+        dest: /root
+      when: needIVM == True
+
+    - name: Set permissions to install script
+      file:
+        path: /root/agent_installer.sh
+        mode: u+x
+      when: needIVM == True
+
+# REMOTE ADMINISTRATION VIA SSH
+# Step 33 of UT Checklist
+    - name: Set SSH protocol to 2
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'Protocol 2'
+
+# Step 34 of UT Checklist
+    - name: Set SSH loglevel to INFO
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'LogLevel INFO'
+        regexp: '^#LogLevel\s'
+
+    - name: Set SSH MaxAuthTries to 4
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'MaxAuthTries 4'
+        regexp: '^#MaxAuthTries\s'
+
+    - name: Set HostbasedAuthentication to no
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'HostbasedAuthentication no'
+        regexp: '^#HostbasedAuthentication\s'
+
+    - name: Set PermitUserEnvironment to no
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'PermitUserEnvironment no'
+        regexp: '^#PermitUserEnvironment\s'
+
+    - name: Set ClientAliveInterval
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'ClientAliveInterval 300'
+        regexp: '^#ClientAliveInterval\s'
+
+    - name: Set ClientAliveCountMax
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'ClientAliveCountMax 0'
+        regexp: '^#ClientAliveCountMax\s'
+
+    - name: Set LoginGraceTime to one minute
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'LoginGraceTime 60'
+        regexp: '^#LoginGraceTime\s'
+
+    - name: Set SSH warning banner
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'Banner /etc/issue.net'
+        regexp: '^#Banner\s'
+
+    - name: Set SSH MaxStartups
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'MaxStartups 10:30:60'
+        regexp: '^#MaxStartups\s'
+
+    - name: Set SSH MaxSessions
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'MaxSessions 4'
+        regexp: '^#MaxSessions\s'
+
+# Step 35 of UT Checklist
+    - name: Disable root SSH login
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'PermitRootLogin no'
+        regexp: '^PermitRootLogin\s'
+
+# Step 36 of UT Checklist
+    - name: Set SSH permitemptypasswords to no
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        line: 'PermitEmptyPasswords no'
+        regexp: '^#PermitEmptyPasswords\s'
+
+    - name: Restart sshd
+      service:
+        name: sshd
+        state: restarted
+
+    - name: Start install script
+      command: ./agent_installer.sh install_start --token=**sometokenvalue** --attributes "{{ insightVMTag }}"
+      when: needIVM == True
+
+    - name: Reboot machine(s)
+      reboot:
+
+#Message to state this set of tasks is complete
+    - name: display complete message
+      debug:
+        msg: 4-- Done with System Integrity

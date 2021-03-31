@@ -1,0 +1,6 @@
+---
+- name: Remove '{{ serverlegacyname }}'
+  apt:
+    name: '{{ serverlegacyname }}'
+    state: absent
+  when: ansible_facts['distribution'] == "Ubuntu"
