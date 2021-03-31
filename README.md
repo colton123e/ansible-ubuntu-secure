@@ -21,7 +21,7 @@ ansible-playbook -i [host-filename] [playbook-name] -kKe '{"insightVMTag":"attri
 
 Example:
 
-ansible-playbook -i hosts CentSecure.yml -kKe '{"insightVMTag":"SomeTagName"}'
+ansible-playbook -i hosts UbuntuSecure.yml -kKe '{"insightVMTag":"SomeTagName"}'
 
 --------------------------------------------------
 Run the play book without InsightVM Agent install:
@@ -30,4 +30,4 @@ ansible-playbook -i [host-filename] [playbook-name] -kKe "needIVM=false"
 
 Example:
 
-ansible-playbook -i hosts CentSecure.yml -kKe "needIVM=false"
+ansible-playbook -i hosts UbuntuSecure.yml -kKe "needIVM=false"
