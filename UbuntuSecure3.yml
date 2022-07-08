@@ -7,48 +7,48 @@
 
 # NETWORK SECURITY AND FIREWALL CONFIG
 # Firewall config
-    - name: Enable the firewall #Ubuntu
-      community.general.ufw:
-        state: enabled
+    # - name: Enable the firewall #Ubuntu
+    #   community.general.ufw:
+    #     state: enabled
 
-    - name: Enable ssh #Ubuntu
-      community.general.ufw:
-        rule: allow
-        port: ssh
-        proto: tcp
+    # - name: Enable ssh #Ubuntu
+    #   community.general.ufw:
+    #     rule: allow
+    #     port: ssh
+    #     proto: tcp
 
-    - name: Enable the firewall logging #Ubuntu
-      community.general.ufw:
-        logging: 'on'
+    # - name: Enable the firewall logging #Ubuntu
+    #   community.general.ufw:
+    #     logging: 'on'
 
-    - name: Configure Loopback In #Ubuntu
-      community.general.ufw:
-        rule: allow
-        direction: in
-        interface: lo
+    # - name: Configure Loopback In #Ubuntu
+    #   community.general.ufw:
+    #     rule: allow
+    #     direction: in
+    #     interface: lo
 
-    - name: Configure Loopback Out #Ubuntu
-      community.general.ufw:
-        rule: allow
-        direction: out
-        interface: lo
+    # - name: Configure Loopback Out #Ubuntu
+    #   community.general.ufw:
+    #     rule: allow
+    #     direction: out
+    #     interface: lo
 
-    - name: Configure Loopback In IPv4 Deny #Ubuntu
-      community.general.ufw:
-        rule: deny
-        direction: in
-        from_ip: 127.0.0.0/8
+    # - name: Configure Loopback In IPv4 Deny #Ubuntu
+    #   community.general.ufw:
+    #     rule: deny
+    #     direction: in
+    #     from_ip: 127.0.0.0/8
 
-    - name: Configure Loopback In IPv6 Deny #Ubuntu
-      community.general.ufw:
-        rule: deny
-        direction: in
-        from_ip: ::1
+    # - name: Configure Loopback In IPv6 Deny #Ubuntu
+    #   community.general.ufw:
+    #     rule: deny
+    #     direction: in
+    #     from_ip: ::1
 
-    - name: Configure outbound connections #Ubuntu
-      community.general.ufw:
-        rule: allow
-        direction: out
+    # - name: Configure outbound connections #Ubuntu
+    #   community.general.ufw:
+    #     rule: allow
+    #     direction: out
 
 # Step 26 of UT Checklist
     - name: Disable IPv4 forwarding

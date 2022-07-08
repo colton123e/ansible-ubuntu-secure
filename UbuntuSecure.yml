@@ -19,10 +19,10 @@
         name: 'unattended-upgrades'
         state: latest
 
-    - name: Install update notifier #Ubuntu
-      apt:
-        name: 'update-notifier-common'
-        state: latest
+    # - name: Install update notifier #Ubuntu
+    #   apt:
+    #     name: 'update-notifier-common'
+    #     state: latest
 
 # SECURE BOOT SETTINGS
 # Set grub password

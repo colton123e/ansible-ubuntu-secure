@@ -1,6 +1,7 @@
 Before running the playbook, you need to install a couple of ansible collections for supporting additional commands used. In the command line enter the following commands:
 
 $ ansible-galaxy collection install ansible.posix
+
 $ ansible-galaxy collection install community.general
 
 
