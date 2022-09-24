@@ -7,59 +7,70 @@
 
 # NETWORK SECURITY AND FIREWALL CONFIG
 # Firewall config
-    # - name: Enable the firewall #Ubuntu
-    #   community.general.ufw:
-    #     state: enabled
+    - name: Enable the firewall #Ubuntu
+      community.general.ufw:
+        state: enabled
+      ignore_errors: yes
 
-    # - name: Enable ssh #Ubuntu
-    #   community.general.ufw:
-    #     rule: allow
-    #     port: ssh
-    #     proto: tcp
+    - name: Enable ssh #Ubuntu
+      community.general.ufw:
+        rule: allow
+        port: ssh
+        proto: tcp
+        from_ip: 192.168.1.0/24
+      ignore_errors: yes
 
-    # - name: Enable the firewall logging #Ubuntu
-    #   community.general.ufw:
-    #     logging: 'on'
+    - name: Enable the firewall logging #Ubuntu
+      community.general.ufw:
+        logging: 'on'
+      ignore_errors: yes
 
-    # - name: Configure Loopback In #Ubuntu
-    #   community.general.ufw:
-    #     rule: allow
-    #     direction: in
-    #     interface: lo
+    - name: Configure Loopback In #Ubuntu
+      community.general.ufw:
+        rule: allow
+        direction: in
+        interface: lo
+      ignore_errors: yes
 
-    # - name: Configure Loopback Out #Ubuntu
-    #   community.general.ufw:
-    #     rule: allow
-    #     direction: out
-    #     interface: lo
+    - name: Configure Loopback Out #Ubuntu
+      community.general.ufw:
+        rule: allow
+        direction: out
+        interface: lo
+      ignore_errors: yes
 
-    # - name: Configure Loopback In IPv4 Deny #Ubuntu
-    #   community.general.ufw:
-    #     rule: deny
-    #     direction: in
-    #     from_ip: 127.0.0.0/8
+    - name: Configure Loopback In IPv4 Deny #Ubuntu
+      community.general.ufw:
+        rule: deny
+        direction: in
+        from_ip: 127.0.0.0/8
+      ignore_errors: yes
 
-    # - name: Configure Loopback In IPv6 Deny #Ubuntu
-    #   community.general.ufw:
-    #     rule: deny
-    #     direction: in
-    #     from_ip: ::1
+    - name: Configure Loopback In IPv6 Deny #Ubuntu
+      community.general.ufw:
+        rule: deny
+        direction: in
+        from_ip: ::1
+      ignore_errors: yes
 
-    # - name: Configure outbound connections #Ubuntu
-    #   community.general.ufw:
-    #     rule: allow
-    #     direction: out
+    - name: Configure outbound connections #Ubuntu
+      community.general.ufw:
+        rule: allow
+        direction: out
+      ignore_errors: yes
 
 # Step 26 of UT Checklist
     - name: Disable IPv4 forwarding
       sysctl:
         name: net.ipv4.conf.all.forwarding
         value: '0'
+      ignore_errors: yes
 
     - name: Disable IPv6 forwarding
       sysctl:
         name: net.ipv6.conf.all.forwarding
         value: '0'
+      ignore_errors: yes
 
 # Step 27 of UT Checklist
 
@@ -67,6 +78,7 @@
       sysctl:
         name: net.ipv4.conf.all.send_redirects
         value: '0'
+      ignore_errors: yes
 
 
 # Step 28 of UT Checklist
@@ -74,6 +86,7 @@
       sysctl:
         name: net.ipv4.conf.all.accept_source_route
         value: '0'
+      ignore_errors: yes
 
 #    - name: Disable IPv4 accept default source route
 #      sysctl:
@@ -84,11 +97,13 @@
       sysctl:
         name: net.ipv6.conf.all.accept_source_route
         value: '0'
+      ignore_errors: yes
 
     - name: Disable IPv6 accept default source route
       sysctl:
         name: net.ipv6.conf.default.accept_source_route
         value: '0'
+      ignore_errors: yes
 
 
 # Step 29 of UT Checklist
@@ -96,60 +111,71 @@
       sysctl:
         name: net.ipv4.conf.all.accept_redirects
         value: '0'
+      ignore_errors: yes
 
     - name: Disable ICMP default redirect acceptance ipv4
       sysctl:
         name: net.ipv4.conf.default.accept_redirects
         value: '0'
+      ignore_errors: yes
 
     - name: Disable ICMP default redirect acceptance ipv6
       sysctl:
         name: net.ipv6.conf.default.accept_redirects
         value: '0'
+      ignore_errors: yes
 
     - name: Disable ICMP secure redirect acceptance ipv4
       sysctl:
         name: net.ipv4.conf.all.secure_redirects
         value: '0'
         sysctl_set: yes
+      ignore_errors: yes
 
     - name: Disable ICMP default secure redirect acceptance ipv4
       sysctl:
         name: net.ipv4.conf.default.secure_redirects
         value: '0'
         sysctl_set: yes
+      ignore_errors: yes
 
     - name: Disable  default send redirects ipv4
       sysctl:
         name: net.ipv4.conf.default.send_redirects
         value: '0'
+      ignore_errors: yes
 
     - name: Disable ICMP default redirect acceptance ipv6
       sysctl:
         name: net.ipv6.conf.all.accept_redirects
         value: '0'
+      ignore_errors: yes
 
     - name: Disable TCP timestamp responses
       sysctl:
         name: net.ipv4.tcp_timestamps
         value: '0'
+      ignore_errors: yes
 
     - name: Disable ip forwards
       sysctl:
         name: net.ipv4.ip_forward
         value: '0'
+      ignore_errors: yes
 
 # Step 30 of UT Checklist
     - name: Enable ignore broadcast replies
       sysctl:
         name: net.ipv4.icmp_echo_ignore_broadcasts
         value: '1'
+      ignore_errors: yes
 
 # Step 31 of UT Checklist
     - name: Enable bad error message protection
       sysctl:
         name: net.ipv4.icmp_ignore_bogus_error_responses
         value: '1'
+      ignore_errors: yes
 
 # Step 32 of UT Checklist
     - name: Enable TCP SYN cookies
@@ -157,16 +183,18 @@
         name: net.ipv4.tcp_syncookies
         value: '1'
         reload: yes
+      ignore_errors: yes
 
     - name: Ipv4 route flush set to 1
       sysctl:
         name: net.ipv4.route.flush
         value: '1'
+      ignore_errors: yes
 
-    - name: Ipv6 route flush set to 1
-      sysctl:
-        name: net.ipv6.route.flush
-        value: '1'
+    # - name: Ipv6 route flush set to 1
+    #   sysctl:
+    #     name: net.ipv6.route.flush
+    #     value: '1'
 
 #Message to state this set of tasks is complete
     - name: display complete message

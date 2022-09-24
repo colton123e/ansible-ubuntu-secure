@@ -1,9 +1,9 @@
 ---
 - hosts: [groupA]
-  vars_prompt:
-    - name: grubpw
-      prompt: Enter a grub password to use on all machines (Make sure it is correct, there is no validation)
-      private: no
+  # vars_prompt:
+  #   - name: grubpw
+  #     prompt: Enter a grub password to use on all machines (Make sure it is correct, there is no validation)
+  #     private: no
   become: yes
   become_method: sudo
   tasks:
@@ -19,70 +19,71 @@
         name: 'unattended-upgrades'
         state: latest
 
-    # - name: Install update notifier #Ubuntu
-    #   apt:
-    #     name: 'update-notifier-common'
-    #     state: latest
+    - name: Install update notifier #Ubuntu
+      apt:
+        name: 'update-notifier-common'
+        state: latest
+      ignore_errors: yes
 
 # SECURE BOOT SETTINGS
 # Set grub password
-    - name: Install pip #Ubuntu
-      apt:
-        name: 'python3-pip'
-        state: latest
+    # - name: Install pip #Ubuntu
+    #   apt:
+    #     name: 'python3-pip'
+    #     state: latest
 
-    - name: Install pexpect
-      pip:
-        name: pexpect
-        state: latest
-        extra_args: --trusted-host pypi.python.org --trusted-host pypi.org --trusted-host files.pythonhosted.org
+    # - name: Install pexpect
+    #   pip:
+    #     name: pexpect
+    #     state: latest
+    #     extra_args: --trusted-host pypi.python.org --trusted-host pypi.org --trusted-host files.pythonhosted.org
 
-    - name: Generate boot loader password #Ubuntu
-      expect:
-        command: grub-mkpasswd-pbkdf2
-        responses:
-          (?i)password: '{{ grubpw }}'
-      register: pw_hash
-      no_log: True
+    # - name: Generate boot loader password #Ubuntu
+    #   expect:
+    #     command: grub-mkpasswd-pbkdf2
+    #     responses:
+    #       (?i)password: '{{ grubpw }}'
+    #   register: pw_hash
+    #   no_log: True
 
-    - name: Alter pw_hash #Ubuntu
-      shell: echo "{{ pw_hash.stdout }}" | sed -n 's/^PBKDF2 hash of your password is //p'
-      register: pw_hash2
-      no_log: True
+    # - name: Alter pw_hash #Ubuntu
+    #   shell: echo "{{ pw_hash.stdout }}" | sed -n 's/^PBKDF2 hash of your password is //p'
+    #   register: pw_hash2
+    #   no_log: True
 
-    - name: Configure grub info #Ubuntu
-      blockinfile:
-        path: /etc/grub.d/40_custom
-        block: |
-          cat << EOF
-          set superusers="root"
-          password_pbkdf2 root "{{ pw_hash2 }}"
-          EOF
-        owner: root
-        group: root
-        mode: '0200'
-        create: yes
-      no_log: True
+    # - name: Configure grub info #Ubuntu
+    #   blockinfile:
+    #     path: /etc/grub.d/40_custom
+    #     block: |
+    #       cat << EOF
+    #       set superusers="root"
+    #       password_pbkdf2 root "{{ pw_hash2 }}"
+    #       EOF
+    #     owner: root
+    #     group: root
+    #     mode: '0200'
+    #     create: yes
+    #   no_log: True
 
-    - name: Enable boot/reboot w/o passwd #Ubuntu
-      lineinfile:
-        path: /etc/grub.d/10_linux
-        regexp: '^CLASS="--class gnu-linux --class gnu --class os"'
-        line: 'CLASS="--class gnu-linux --class gnu --class os --unrestricted"'
+    # - name: Enable boot/reboot w/o passwd #Ubuntu
+    #   lineinfile:
+    #     path: /etc/grub.d/10_linux
+    #     regexp: '^CLASS="--class gnu-linux --class gnu --class os"'
+    #     line: 'CLASS="--class gnu-linux --class gnu --class os --unrestricted"'
 
-    - name: Update the grub config #Ubuntu
-      command: update-grub
+    # - name: Update the grub config #Ubuntu
+    #   command: update-grub
 
-    - name: Remove pexpect
-      pip:
-        name: pexpect
-        state: absent
+    # - name: Remove pexpect
+    #   pip:
+    #     name: pexpect
+    #     state: absent
 
-    - name: Remove pip #Ubuntu
-      apt:
-        name: 'python3-pip'
-        state: absent
-        autoremove: yes
+    # - name: Remove pip #Ubuntu
+    #   apt:
+    #     name: 'python3-pip'
+    #     state: absent
+    #     autoremove: yes
 
 # Remove GUI elements
     - name: Remove the X window system

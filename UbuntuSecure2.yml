@@ -18,6 +18,7 @@
 
     - name: Reload sysctl config
       command: sysctl -p
+      ignore_errors: yes
 
     - name: Configure so core dumps can't be made by setuid progs
       lineinfile:

@@ -11,37 +11,43 @@
 # Set the TZ
     - name: Set Timezone
       community.general.timezone:
-        name: America/Chicago
+        name: America/Denver
 
 # Step 41 of UT Checklist
     - name: Install auditd (if it isn't already) #Ubuntu
       apt:
         name: 'auditd'
         state: latest
+      ignore_errors: yes
 
     - name: Install audispd-plugins (if it isn't already) #Ubuntu
       apt:
         name: 'audispd-plugins'
         state: latest
+      ignore_errors: yes
 
     - name: Enable auditd
       systemd:
         name: auditd
         enabled: yes
         state: started
+      ignore_errors: yes
 
     - name: Ensure auditing for processes that start prior to auditd is enabled #Ubuntu
       lineinfile:
         path: /etc/default/grub
         line: GRUB_CMDLINE_LINUX="audit=1"
+      ignore_errors: yes
 
     - name: Set audit_backlog_limit #Ubuntu
       lineinfile:
         path: /etc/default/grub
         line: GRUB_CMDLINE_LINUX="audit_backlog_limit=8192"
+      ignore_errors: yes
 
     - name: Update the grub config #Ubuntu
       command: update-grub
+      ignore_errors: yes
 
 # PAM CONFIGURATION
 # Step 46 of UT Checklist
