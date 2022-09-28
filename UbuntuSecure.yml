@@ -94,6 +94,7 @@
         name: xserver-xorg*
         state: absent
         purge: yes
+      ignore_errors: yes
 
 #Message to state sys updates and secure boot config is done
     - name: display complete message

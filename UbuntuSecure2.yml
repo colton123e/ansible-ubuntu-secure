@@ -106,11 +106,11 @@
         loop_var: serverservicename
 
 # Step 24 of UT Checklist
-    - name: Change daemon umask value #Ubuntu
-      lineinfile:
-        path: /etc/login.defs
-        regexp: '^UMASK'
-        line: 'UMASK 027'
+    # - name: Change daemon umask value #Ubuntu
+    #   lineinfile:
+    #     path: /etc/login.defs
+    #     regexp: '^UMASK'
+    #     line: 'UMASK 027'
 
     - name: Add authentication to single user mode
       lineinfile:
